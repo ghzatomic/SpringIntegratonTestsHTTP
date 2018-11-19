@@ -1,0 +1,25 @@
+.classpath
+.project
+.settings/
+
+# Maven
+target/
+
+# Netbeans
+nb-configuration.xml
+nbactions.xml
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+
+${CATALINA_HOME}/
+
+# Java
+*.class

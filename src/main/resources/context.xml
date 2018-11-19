@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-amqp="http://www.springframework.org/schema/integration/amqp"
+	xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:int-http="http://www.springframework.org/schema/integration/http"
+	xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/integration
+    http://www.springframework.org/schema/integration/spring-integration.xsd
+    http://www.springframework.org/schema/integration/amqp 
+    http://www.springframework.org/schema/integration/amqp/spring-integration-amqp.xsd
+    http://www.springframework.org/schema/rabbit
+    http://www.springframework.org/schema/rabbit/spring-rabbit-1.0.xsd
+    http://www.springframework.org/schema/context
+  	http://www.springframework.org/schema/context/spring-context.xsd
+  	http://www.springframework.org/schema/integration/http
+    http://www.springframework.org/schema/integration/http/spring-integration-http.xsd
+    http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm.xsd">
+
+	<context:annotation-config />
+
+	<context:component-scan base-package="br.com.caiopaulucci" />
+
+	<!-- bean definitions here -->
+
+	<!-- <si:transformer id="testTransformer" ref="transformerExample" input-channel="input1" 
+		method="transform" output-channel="input2"/> -->
+
+	<!-- Inbound/Outbound Channels -->
+	<int:channel id="employeeSearchRequest" />
+	<int:channel id="employeeSearchResponse" />
+
+	<int-http:inbound-gateway id="i2nInvokeFromPOS" 
+		supported-methods="POST" request-channel="employeeSearchRequest"
+		reply-channel="employeeSearchResponse" path="/postProduct"
+		request-payload-type="br.com.caiopaulucci.CaioDTO">
+	</int-http:inbound-gateway>
+
+	<int:service-activator id="employeeServiceActivator"
+					input-channel="employeeSearchRequest"
+					output-channel="employeeSearchResponse"
+					ref="testeSA"
+					method="teste"
+					requires-reply="true"
+					send-timeout="60000"/>
+
+
+<!-- ******************************************************************** -->
+
+	<int:channel id="requests" />
+	<int:channel id="requestsJson" />
+	<int:channel id="requestsReply" />
+	<int:object-to-json-transformer input-channel="requests" output-channel="requestsJson" content-type="application/json" /> 
+	<int-http:outbound-gateway
+	    request-channel="requestsJson" reply-channel="requestsReply"
+	    url="http://localhost:8080/postProduct"
+	    http-method="POST" 
+	    expected-response-type="java.lang.String">
+	 </int-http:outbound-gateway>
+
+
+	<int:json-to-object-transformer input-channel="requestsReply" type="br.com.caiopaulucci.CaioDTO"/>   
+
+</beans>
